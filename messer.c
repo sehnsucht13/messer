@@ -11,6 +11,9 @@ xcb_window_t window;
 uint32_t mask = 0;
 uint32_t values[2];
 
+void handleKeypress(xcb_key_press_event_t *event) {
+  printf("Keyboard event.");
+}
 
 int main(int argc, char *argv[])
 {
@@ -32,24 +35,29 @@ int main(int argc, char *argv[])
   // Either catch an event or check if the program must shutdown
   while ((e = xcb_wait_for_event(connection)) && exitFlag) {
     switch (e->response_type) {
+	  case XCB_ENTER_NOTIFY:
+	  printf("Have to enter notify you\n");
+	  break;
 	  case XCB_MAP_WINDOW:
-		printf("Caught a map window request");
+		printf("Caught a map window request\n");
+	  break;
+	case XCB_MAP_REQUEST:
+	  printf("Map request caught\n");
       case XCB_EXPOSE: 
   	    /* xcb_expose_event_t *expEv = (xcb_expose_event_t *)e; */
   	    //Handle event for exposure of window here
-  		printf("Caught an expose event!");
+  	  printf("Caught an expose event!\n");
+  	  break;
+	case XCB_KEY_PRESS: {
+	  xcb_key_press_event_t *keyEv = (xcb_key_press_event_t *)e;
+		handleKeypress(keyEv);
   	    break;
-      
-      case XCB_KEY_PRESS: 
-  	    /* xcb_key_press_event_t *keyEv = (xcb_key_press_event_t *)e; */
-  	    // Handle keypress here
-  		printf("Caught a keyboard press event!");
-		exitFlag = false;
-  	    break;
+	}
 
   	  default:
-  		printf("Could not recognize the event");
+  		printf("not handled\n");
         }
+	free(e);
   }
   return 0;
 }
